@@ -42,10 +42,8 @@ nidgen archive --input "$root/source/tools/nidgen/nids/cellFs.yaml" \
   --toolchain-bin "$PS3DEV/ppu/bin" --out-dir "$work/stubs/fs" --abi ilp32
 install -m 0644 "$work/stubs/fs/libfs_stub.a" "$PS3DK/ppu/lib/"
 ln -sf libfs_stub.a "$PS3DK/ppu/lib/libsysfs.a"
-# Include the SDK's native libc extras, matching its stub install recipe.
-make -C "$root/source/sdk/libc_stub_extras" all PSL1GHT="$PS3DK"
-powerpc64-ps3-elf-ar r "$PS3DK/ppu/lib/libc_stub.a" "$root/source/sdk/libc_stub_extras/build/"*.o
-powerpc64-ps3-elf-ranlib "$PS3DK/ppu/lib/libc_stub.a"
+# SPU printf compatibility extras need PSL1GHT/SPU headers and are deliberately
+# excluded from this resident PPU-plugin install. Native libc imports remain.
 printf '%s\n' 'FirebirdTA01/PS3DK v0.28.0' \
   'Source commit: 0bd322f172e59a25aeb0a4b72c23539f8bd574aa' \
   'ILP32 native firmware imports: sysPrxForUser, sys_net, sys_libc, sys_fs' > "$root/PROVENANCE.txt"
