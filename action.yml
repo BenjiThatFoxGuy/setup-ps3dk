@@ -1,0 +1,74 @@
+name: Setup PS3DK
+description: Install pinned upstream PS3DK PPU compiler, headers, PRX runtime and host tools on Ubuntu x86_64
+outputs:
+  ps3dev:
+    description: PPU toolchain prefix
+    value: ${{ steps.paths.outputs.ps3dev }}
+  ps3dk:
+    description: SDK headers and minimal PRX runtime prefix
+    value: ${{ steps.paths.outputs.ps3dk }}
+  sdk-version:
+    description: Pinned upstream release
+    value: v0.28.0
+  cache-hit:
+    description: Whether the prepared SDK was restored from cache
+    value: ${{ steps.cache.outputs.cache-hit }}
+runs:
+  using: composite
+  steps:
+    - name: Check host and select installation path
+      id: paths
+      shell: bash
+      run: |
+        set -euo pipefail
+        if [[ "$RUNNER_OS" != Linux || "$RUNNER_ARCH" != X64 ]]; then
+          echo '::error::setup-ps3dk supports Linux x86_64 only.'
+          exit 1
+        fi
+        . /etc/os-release
+        if [[ "$ID" != ubuntu || "$VERSION_ID" != 26.04 ]]; then
+          echo '::error::Use runs-on: ubuntu-26.04. Upstream binaries were built on Ubuntu 26.04.'
+          exit 1
+        fi
+        root="$HOME/.cache/setup-ps3dk/v0.28.0"
+        printf 'root=%s\nps3dev=%s/ps3dev\nps3dk=%s/ps3dev/ps3dk\n' "$root" "$root" "$root" >> "$GITHUB_OUTPUT"
+        recipe=$(cd "$ACTION_DIR" && sha256sum scripts/install.sh sdk-assets.sha256 | sha256sum | cut -d ' ' -f1)
+        printf 'recipe=%s\n' "$recipe" >> "$GITHUB_OUTPUT"
+      env:
+        ACTION_DIR: ${{ github.action_path }}
+    - name: Install host runtime dependencies
+      shell: bash
+      run: |
+        set -euo pipefail
+        sudo apt-get update -qq
+        sudo apt-get install -y --no-install-recommends libgmp10 libmpfr6 libmpc3 libisl23 libelf1t64 libssl3t64 zlib1g libzstd1
+    - name: Restore prepared PS3DK
+      id: cache
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+      with:
+        path: ${{ steps.paths.outputs.root }}
+        key: ps3dk-v0.28.0-${{ runner.os }}-${{ runner.arch }}-ubuntu26.04-${{ steps.paths.outputs.recipe }}
+    - name: Install verified upstream assets and PRX adjunct
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      env:
+        SETUP_PS3DK_ROOT: ${{ steps.paths.outputs.root }}
+        SETUP_PS3DK_ACTION: ${{ github.action_path }}
+      run: bash "$SETUP_PS3DK_ACTION/scripts/install.sh"
+    - name: Export and verify toolchain
+      shell: bash
+      env:
+        SDK_ROOT: ${{ steps.paths.outputs.root }}
+      run: |
+        set -euo pipefail
+        export PS3DEV="$SDK_ROOT/ps3dev"
+        export PS3DK="$PS3DEV/ps3dk"
+        export PATH="$PS3DEV/ppu/bin:$PS3DEV/bin:$PATH"
+        printf 'PS3DEV=%s\nPS3DK=%s\n' "$PS3DEV" "$PS3DK" >> "$GITHUB_ENV"
+        printf '%s\n%s\n' "$PS3DEV/bin" "$PS3DEV/ppu/bin" >> "$GITHUB_PATH"
+        powerpc64-ps3-elf-gcc --version
+        prx-gen --version
+        test -s "$PS3DK/ppu/lib/lv2-prx-crt.o"
+        test -s "$PS3DK/ppu/include/sys/prx_module.h"
+        test -x "$PS3DEV/bin/make_sprx"
+        test -x "$PS3DEV/bin/fself"

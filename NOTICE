@@ -1,0 +1,13 @@
+setup-ps3dk uses FirebirdTA01/PS3DK:
+https://github.com/FirebirdTA01/PS3DK
+Release v0.28.0, source commit 0bd322f172e59a25aeb0a4b72c23539f8bd574aa.
+
+The installer downloads unmodified official release assets. It copies SDK
+headers and PRX linker files and assembles the PRX startup source on CI.
+PS3DK glue code is MIT licensed, copyright (c) 2026 PS3DK toolchain
+contributors. Its imported components retain their original licenses,
+including GCC (GPLv3 with runtime exception), binutils (GPLv3), newlib
+(BSD variants), and PSL1GHT (MIT). The installed source/LICENSE and
+source/NOTICE contain upstream attribution and licensing details.
+
+This repository does not redistribute the downloaded compiler archives.
