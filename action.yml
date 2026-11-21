@@ -70,7 +70,7 @@ runs:
         powerpc64-ps3-elf-gcc --version
         prx-gen --version
         nidgen --version
-        for library in lv2 net c fs; do
+        for library in lv2 net c fs stdc; do
           test -s "$PS3DK/ppu/lib/lib${library}_stub.a"
         done
         test -s "$PS3DK/ppu/lib/lv2-prx-crt.o"

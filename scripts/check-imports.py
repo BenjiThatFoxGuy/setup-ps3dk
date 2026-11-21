@@ -47,8 +47,8 @@ assert start == end
 source = Path(os.environ['PS3DK_SOURCE']) / 'tools/nidgen/nids'
 required = {
     'sysPrxForUser': ('extracted/liblv2_stub.yaml', ['sys_ppu_thread_create', 'sys_time_get_system_time']),
-    'sys_net': ('extracted/libnet_stub.yaml', ['socket', 'bind', 'send', 'socketclose']),
-    'sys_libc': ('extracted/libc_stub.yaml', ['snprintf', 'memcpy', 'memset', 'strlen']),
+    'sys_net': ('extracted/libnet_stub.yaml', ['socket', 'bind', 'send', 'socketclose', 'socketpoll']),
+    'stdc': ('../../../plugin-imports/stdc.yaml', ['snprintf', 'vsnprintf', 'memcpy', 'memset', 'memchr', 'memcmp', 'strlen', 'strchr', 'strcmp', 'strncmp', 'strstr']),
     'sys_fs': ('cellFs.yaml', ['cellFsOpen', 'cellFsRead', 'cellFsClose']),
     'vshmain': (None, ['vshmain_EB757101']),
 }

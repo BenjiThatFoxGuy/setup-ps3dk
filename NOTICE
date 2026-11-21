@@ -11,3 +11,11 @@ including GCC (GPLv3 with runtime exception), binutils (GPLv3), newlib
 source/NOTICE contain upstream attribution and licensing details.
 
 This repository does not redistribute the downloaded compiler archives.
+
+VSH stdc function names and NID values come from aldostools/webMAN-MOD:
+https://github.com/aldostools/webMAN-MOD/blob/6bd4425229544e60c5c8cfdcadb664dfb163d9f3/vsh/stdc.h
+SHA-256: b0e6d68693ea2938fbcd8e6438b7a5c85a54ee9da7c0d1042196a3bf654c83b0
+webMAN MOD is GPL-3.0 licensed. The installer reads factual name/NID mappings;
+it does not compile or bundle webMAN implementation code. The custom VSH
+smoke import uses the GetCooperationMode NID documented in vsh/vshmain.h.
+

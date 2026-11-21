@@ -22,7 +22,7 @@ jobs:
 
 The setup targets x86_64 and PS3DK v0.28.0. It exports `PS3DEV`, `PS3DK`, `PS3DK_SOURCE`, `PS3_TOOLS` and compiler/tool directories on `PATH` for later steps.
 
-This setup includes SDK headers, PRX startup/linker files, `nidgen`, and ILP32 firmware import libraries: `lv2_stub`, `net_stub`, `c_stub` and `fs_stub`. The socket archive exposes native `sys_net` imports for resident plugins, without process-runtime wrappers. Link with `-nostdlib` and the needed stub libraries, as shown in `scripts/smoke.sh`. It does not install the process runtime, full SDK libraries, portlibs or SPU tools.
+This setup includes SDK headers, PRX startup/linker files, `nidgen`, and ILP32 firmware import libraries: `lv2_stub`, `net_stub`, `c_stub`, `stdc_stub` and `fs_stub`. The socket archive exposes native `sys_net` imports for resident plugins, without process-runtime wrappers. Link with `-nostdlib` and the needed stub libraries, as shown in `scripts/smoke.sh`. VSH formatting and memory calls need `-lstdc_stub`; `c_stub` alone does not provide them. It does not install the process runtime, full SDK libraries, portlibs or SPU tools.
 
 ## CI
 

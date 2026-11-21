@@ -1,6 +1,8 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdarg.h>
+#include <net/poll.h>
 #include <string.h>
 #include <ppu-types.h>
 #include <sys/socket.h>
@@ -14,6 +16,15 @@ extern int sys_ppu_thread_create(u64 *, void (*)(u64), u64, int, size_t, u64, co
 extern u64 sys_time_get_system_time(void);
 extern u32 vshmain_EB757101(void);
 static volatile int result;
+
+static int format(char *buffer, size_t size, const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    int count = vsnprintf(buffer, size, fmt, ap);
+    va_end(ap);
+    return count;
+}
 
 static void worker(u64 arg)
 {
@@ -43,7 +54,16 @@ int module_start(unsigned int args, void *argp)
     memcpy(copy, message, sizeof(copy));
     result = bind(s, (struct sockaddr *)&address, sizeof(address));
     result = (int)send(s, copy, strlen(message), 0);
+    struct pollfd pollfd = {s, POLLIN, 0};
+    result = socketpoll(&pollfd, 1, 0);
     result = socketclose(s);
+    result = format(message, sizeof(message), "%s", copy);
+    result = (int)((char *)memchr(copy, 's', sizeof(copy)) - copy);
+    result = memcmp(copy, message, sizeof(copy));
+    result = strcmp(copy, message);
+    result = strncmp(copy, message, sizeof(copy));
+    result = (int)(strchr(copy, 's') - copy);
+    result = (int)(strstr(copy, "sdk") - copy);
     result = sys_ppu_thread_create(&thread, worker, 0, 1500, 16384, 1, "sdk_smoke");
     result = raw_open("/dev_hdd0/sdk-smoke-do-not-run", &fd);
     result = cellFsOpen("/dev_hdd0/sdk-smoke-do-not-run", CELL_FS_O_RDONLY, &fd, NULL, 0);

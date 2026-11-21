@@ -42,6 +42,33 @@ nidgen archive --input "$root/source/tools/nidgen/nids/cellFs.yaml" \
   --toolchain-bin "$PS3DEV/ppu/bin" --out-dir "$work/stubs/fs" --abi ilp32
 install -m 0644 "$work/stubs/fs/libfs_stub.a" "$PS3DK/ppu/lib/"
 ln -sf libfs_stub.a "$PS3DK/ppu/lib/libsysfs.a"
+# VSH's standard C functions are in stdc, not the SDK's partial sys_libc set.
+# Read name/NID facts from the documented webMAN header, without copying code.
+webman=6bd4425229544e60c5c8cfdcadb664dfb163d9f3
+curl --fail --location --retry 5 "https://raw.githubusercontent.com/aldostools/webMAN-MOD/$webman/vsh/stdc.h" -o "$work/stdc.h"
+printf '%s  %s\n' b0e6d68693ea2938fbcd8e6438b7a5c85a54ee9da7c0d1042196a3bf654c83b0 "$work/stdc.h" | sha256sum --check --strict
+mkdir -p "$root/source/plugin-imports"
+python3 - "$work/stdc.h" "$root/source/plugin-imports/stdc.yaml" <<'PY'
+from pathlib import Path
+import re
+import sys
+header = Path(sys.argv[1]).read_text()
+symbols = 'snprintf vsnprintf memcpy memset memchr memcmp strlen strchr strcmp strncmp strstr'.split()
+lines = ['# Name/NID facts: aldostools/webMAN-MOD vsh/stdc.h',
+         '# Commit 6bd4425229544e60c5c8cfdcadb664dfb163d9f3',
+         'library: stdc', 'version: 1', 'module: stdc', 'archive_name: stdc', 'exports:']
+for symbol in symbols:
+    match = re.search(r'#define ' + symbol + r' stdc_([0-9A-F]{8})\b', header)
+    if not match:
+        raise SystemExit(f'Missing stdc mapping for {symbol}')
+    lines += [f'  - name: {symbol}', f"    nid: '0x{match[1]}'"]
+Path(sys.argv[2]).write_text('\n'.join(lines) + '\n')
+PY
+nidgen archive --input "$root/source/plugin-imports/stdc.yaml" \
+  --toolchain-bin "$PS3DEV/ppu/bin" --out-dir "$work/stubs/stdc" --abi ilp32
+install -m 0644 "$work/stubs/stdc/libstdc_stub.a" "$PS3DK/ppu/lib/"
+printf '%s\n' "https://github.com/aldostools/webMAN-MOD/blob/$webman/vsh/stdc.h" \
+  'Only name/NID facts are used; webMAN source is not compiled or bundled.' > "$root/licenses/stdc-source.txt"
 # SPU printf compatibility extras need PSL1GHT/SPU headers and are deliberately
 # excluded from this resident PPU-plugin install. Native libc imports remain.
 printf '%s\n' 'FirebirdTA01/PS3DK v0.28.0' \

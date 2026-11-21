@@ -18,7 +18,7 @@ powerpc64-ps3-elf-gcc -mcpu=cell -specs="$PS3DK/ppu/lib/lv2-prx.specs" \
   -Wl,-T,"$PS3DK/ppu/lib/lv2-prx.ld" -Wl,-Map,smoke-artifact/smoke.map \
   "$PS3DK/ppu/lib/lv2-prx-crt.o" smoke-artifact/smoke.o \
   -L"$PS3DK/ppu/lib" -Wl,--start-group smoke-artifact/imports/libvshmain_stub.a \
-  -llv2_stub -lnet_stub -lc_stub -lfs_stub -lgcc -Wl,--end-group \
+  -llv2_stub -lnet_stub -lc_stub -lstdc_stub -lfs_stub -lgcc -Wl,--end-group \
   -o smoke-artifact/smoke.elf
 powerpc64-ps3-elf-nm --undefined-only smoke-artifact/smoke.elf > smoke-artifact/undefined.txt
 if [[ -s smoke-artifact/undefined.txt ]]; then
