@@ -30,4 +30,22 @@ cp "$root/source/runtime/lv2/crt/lv2-prx.ld" "$root/source/runtime/lv2/crt/lv2-p
 # The official Linux compiler archive does not include the installed PRX CRT.
 # Assemble this small adjunct from the verified release source on the runner.
 powerpc64-ps3-elf-gcc -mcpu=cell -c "$root/source/runtime/lv2/crt/lv2-prx.S"   -o "$PS3DK/ppu/lib/lv2-prx-crt.o"
-printf '%s\n' 'FirebirdTA01/PS3DK v0.28.0'   'Source commit: 0bd322f172e59a25aeb0a4b72c23539f8bd574aa' > "$root/PROVENANCE.txt"
+# Generate native firmware import archives using the release's nidgen recipes.
+# Keep sys_net's native socket symbols: the SDK's process-oriented front end
+# renames them and needs librt/pthread initialization, unsuitable for VSH PRXs.
+for library in lv2 net c; do
+  nidgen archive --input "$root/source/tools/nidgen/nids/extracted/lib${library}_stub.yaml" \
+    --toolchain-bin "$PS3DEV/ppu/bin" --out-dir "$work/stubs/$library" --abi ilp32
+  install -m 0644 "$work/stubs/$library/lib${library}_stub.a" "$PS3DK/ppu/lib/"
+done
+nidgen archive --input "$root/source/tools/nidgen/nids/cellFs.yaml" \
+  --toolchain-bin "$PS3DEV/ppu/bin" --out-dir "$work/stubs/fs" --abi ilp32
+install -m 0644 "$work/stubs/fs/libfs_stub.a" "$PS3DK/ppu/lib/"
+ln -sf libfs_stub.a "$PS3DK/ppu/lib/libsysfs.a"
+# Include the SDK's native libc extras, matching its stub install recipe.
+make -C "$root/source/sdk/libc_stub_extras" all PSL1GHT="$PS3DK"
+powerpc64-ps3-elf-ar r "$PS3DK/ppu/lib/libc_stub.a" "$root/source/sdk/libc_stub_extras/build/"*.o
+powerpc64-ps3-elf-ranlib "$PS3DK/ppu/lib/libc_stub.a"
+printf '%s\n' 'FirebirdTA01/PS3DK v0.28.0' \
+  'Source commit: 0bd322f172e59a25aeb0a4b72c23539f8bd574aa' \
+  'ILP32 native firmware imports: sysPrxForUser, sys_net, sys_libc, sys_fs' > "$root/PROVENANCE.txt"

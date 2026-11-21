@@ -1,0 +1,8 @@
+library: vshmain
+version: 1
+module: vshmain
+exports:
+  - name: vshmain_EB757101
+    nid: '0xEB757101'
+    signature: 'uint32_t vshmain_EB757101(void)'
+    notes: 'Link-only fixture for XMBridge GetCooperationMode import'

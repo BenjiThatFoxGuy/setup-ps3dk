@@ -20,13 +20,13 @@ jobs:
       - run: make
 ```
 
-The setup targets x86_64 and PS3DK v0.28.0. It exports `PS3DEV`, `PS3DK` and compiler/tool directories on `PATH` for later steps.
+The setup targets x86_64 and PS3DK v0.28.0. It exports `PS3DEV`, `PS3DK`, `PS3DK_SOURCE`, `PS3_TOOLS` and compiler/tool directories on `PATH` for later steps.
 
-This is a minimal PPU/PRX setup: the PPU compiler, SDK headers, PRX startup object, linker files and host tools. It does not install the full SDK libraries, PSL1GHT, portlibs or the SPU toolchain. Code that needs those libraries will need more setup. For a library-free module, see the smoke build in `scripts/smoke.sh`.
+This setup includes SDK headers, PRX startup/linker files, `nidgen`, and ILP32 firmware import libraries: `lv2_stub`, `net_stub`, `c_stub` and `fs_stub`. The socket archive exposes native `sys_net` imports for resident plugins, without process-runtime wrappers. Link with `-nostdlib` and the needed stub libraries, as shown in `scripts/smoke.sh`. It does not install the process runtime, full SDK libraries, portlibs or SPU tools.
 
 ## CI
 
-The SDK check workflow compiles and links a small module, builds and checks its PRX, then produces `.sprx` and `.fake.sprx` containers. It uploads the outputs with logs and checksums. You can also start it manually from the Actions tab.
+The expanded smoke check is awaiting CI verification. It covers socket calls, native thread creation and time, formatting and memory calls, filesystem imports and a custom `nidgen` import. It checks the linked PRX import tables and uploads `.prx`, `.sprx` and `.fake.sprx` outputs with logs and checksums. You can also start it manually from the Actions tab.
 
 These checks do not run code on a PS3 or in RPCS3. A successful build is not a console compatibility test.
 

@@ -1,11 +1,11 @@
 name: Setup PS3DK
-description: Install pinned upstream PS3DK PPU compiler, headers, PRX runtime and host tools on Ubuntu x86_64
+description: Install PS3DK PPU compiler, headers, native PRX import libraries and host tools on Ubuntu x86_64
 outputs:
   ps3dev:
     description: PPU toolchain prefix
     value: ${{ steps.paths.outputs.ps3dev }}
   ps3dk:
-    description: SDK headers and minimal PRX runtime prefix
+    description: SDK headers, PRX runtime and firmware import libraries
     value: ${{ steps.paths.outputs.ps3dk }}
   sdk-version:
     description: Pinned upstream release
@@ -64,10 +64,15 @@ runs:
         export PS3DEV="$SDK_ROOT/ps3dev"
         export PS3DK="$PS3DEV/ps3dk"
         export PATH="$PS3DEV/ppu/bin:$PS3DEV/bin:$PATH"
-        printf 'PS3DEV=%s\nPS3DK=%s\n' "$PS3DEV" "$PS3DK" >> "$GITHUB_ENV"
+        printf 'PS3DEV=%s\nPS3DK=%s\nPS3DK_SOURCE=%s\nPS3_TOOLS=%s\n' \
+          "$PS3DEV" "$PS3DK" "$SDK_ROOT/source" "$PS3DEV/bin" >> "$GITHUB_ENV"
         printf '%s\n%s\n' "$PS3DEV/bin" "$PS3DEV/ppu/bin" >> "$GITHUB_PATH"
         powerpc64-ps3-elf-gcc --version
         prx-gen --version
+        nidgen --version
+        for library in lv2 net c fs; do
+          test -s "$PS3DK/ppu/lib/lib${library}_stub.a"
+        done
         test -s "$PS3DK/ppu/lib/lv2-prx-crt.o"
         test -s "$PS3DK/ppu/include/sys/prx_module.h"
         test -x "$PS3DEV/bin/make_sprx"
