@@ -2,7 +2,7 @@
 
 A GitHub Action for building PS3 PRX modules on GitHub-hosted Ubuntu runners, using [FirebirdTA01/PS3DK](https://github.com/FirebirdTA01/PS3DK).
 
-The action is under development. CI has not verified the setup yet.
+[The first SDK check](https://github.com/BenjiThatFoxGuy/setup-ps3dk/actions/runs/44928474115) passed on Ubuntu 26.04 x86_64. It produced a PRX and both SPRX containers; the downloaded files matched the build checksums.
 
 ## Usage
 
@@ -15,7 +15,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: BenjiThatFoxGuy/setup-ps3dk@main
       - run: make
 ```
@@ -26,7 +26,7 @@ This is a minimal PPU/PRX setup: the PPU compiler, SDK headers, PRX startup obje
 
 ## CI
 
-The SDK check workflow is intended to compile and link a small module, build and check its PRX, then produce `.sprx` and `.fake.sprx` containers. It uploads the outputs with logs and checksums. You can also start it manually from the Actions tab.
+The SDK check workflow compiles and links a small module, builds and checks its PRX, then produces `.sprx` and `.fake.sprx` containers. It uploads the outputs with logs and checksums. You can also start it manually from the Actions tab.
 
 These checks do not run code on a PS3 or in RPCS3. A successful build is not a console compatibility test.
 

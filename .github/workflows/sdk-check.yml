@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-26.04
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           persist-credentials: false
       - uses: ./
@@ -25,7 +25,7 @@ jobs:
         shell: bash
         run: bash scripts/smoke.sh
       - name: Upload smoke outputs
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: ps3dk-v0.28.0-prx-smoke-${{ github.run_id }}
           path: smoke-artifact/
